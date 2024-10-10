@@ -6,3 +6,5 @@ Catégories : Maths, Images, Trigonométrie, Vecteurs, Produit Scalaire, Gestion
 ```
 
 > *Réaliser une fonction permettant de générer un **dégradé de 2 couleurs** suivant un **angle aléatoire***.
+
+<img src="thumb.png" width=256px>
