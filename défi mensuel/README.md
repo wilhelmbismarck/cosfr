@@ -27,6 +27,10 @@ Oui, *à minima* en Scratch, plus, parfois :
 
 Ces corrections sont publiées le 1<sup>er</sup> du mois suivant.
 
+```
+Attention | Les solutions ne seront pas publiées ici au format sb3, ainsi, si nous ne publions pas d'autre solution que celle au format Scratch, il n'y aura pas de solution sur GitHub.
+```
+
 ## Participer au « Défi Mensuel »
 
 Nous vous invitons fortement à participer aux défis à votre portée, c'est un excellent moyen de progresser en programmation.
