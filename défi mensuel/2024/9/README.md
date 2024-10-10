@@ -6,3 +6,5 @@ Catégories : Maths, Triangles, Points, Vecteurs
 ```
 
 > *Comment détecter si un point aléatoire est dans un triangle quelconque ?*
+
+<img src="thumb.png" width=256px>
