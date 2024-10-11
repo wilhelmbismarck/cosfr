@@ -2,7 +2,7 @@
 
 ```
 Difficulté : 4/4 Expert
-Catégories : Maths, Images, Trigonométrie, Vecteurs, Produit Scalaire, Gestion de Matrices
+Catégories : Maths, Images, Géométrie, Figures, Trigonométrie, Vecteurs, Produit Scalaire, Gestion de Matrices
 ```
 
 > *Réaliser une fonction permettant de générer un **dégradé de 2 couleurs** suivant un **angle aléatoire***.
