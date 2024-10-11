@@ -2,7 +2,7 @@
 
 ```
 Difficulté : 3/4 Difficile
-Catégories : Maths, Triangles, Points, Vecteurs
+Catégories : Maths, Géométrie, Figures, Points, Vecteurs
 ```
 
 > *Comment détecter si un point aléatoire est dans un triangle quelconque ?*
