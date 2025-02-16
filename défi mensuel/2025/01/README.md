@@ -7,3 +7,5 @@ Catégories : Stylo Scratch, Maths, Pourcentages, Récursivité
 > *Réaliser une fonction (l'utilisation de sous-fonctions est autorisée) permettant d'**afficher un carré** avec le **stylo**, avec les options suivantes : couleur, bordure, dimensions (et radius en bonus), le tout **sans estampillage***.
 
 <img src="thumb.png" width=256px>
+
+**Note** | Une solution a été partagée sur Scratch ([lien](https://scratch.mit.edu/projects/1134866495/)).
