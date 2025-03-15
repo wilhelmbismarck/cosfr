@@ -36,7 +36,7 @@ class Matrice :
             for i in j     :
                 iLen : int = len(str(i))
                 if iLen < maxLen :
-                       txt += "0"*(maxLen-iLen) + str(i)
+                       txt += " "*(maxLen-iLen) + str(i)
                 else : txt += str(i)
                 txt += ' '
         return txt
@@ -55,7 +55,7 @@ def approcherPI(matrice : 'Matrice') -> float :
     countIn : int = 0
     for element in matrice :
         pos : bool = matrice.appartientCercle(element[0], element[1])
-        if pos : countIn += 1
+        if pos : countIn += element[2]
         count += 1
     return 4 * (countIn / count)
 
