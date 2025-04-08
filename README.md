@@ -1,4 +1,4 @@
-<img src="loc/assets/icon.svg" width="256px" align="right">
+<img src="loc/assets/banner.svg" width="100%" align="center">
 
 Dépôt GitHub du serveur Discord de la **Communauté Scratch Francophone** non-officielle.
 
