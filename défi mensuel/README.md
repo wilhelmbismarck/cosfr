@@ -1,8 +1,8 @@
-# <img src="trophy.png" width=24px> Défi Mensuel - Foire Aux Questions
+# <img src="assets/trophy.png" width=24px> Défi Mensuel - Foire Aux Questions
 
 ## Qu'est-ce que le « Défi Mensuel » ?
 
-Le **« <img src="trophy.png" width=14px> Défi Mensuel »** est un **challenge de code** proposé _chaque mois_ aux membres de la **Communauté Scratch Francophone Discord**.
+Le **« <img src="assets/trophy.png" width=14px> Défi Mensuel »** est un **challenge de code** proposé _chaque mois_ aux membres de la **Communauté Scratch Francophone Discord**.
 
 ### Quand est-il proposé ?
 
@@ -37,3 +37,5 @@ Pour participer, assurez-vous d'être sur [notre serveur Discord](https://discor
 Si vous êtes sur le serveur et que vous partagez votre projet (sur ce dernier), même incorrect, vous recevrez une récompense.
 
 ----
+
+<img src="assets/trophy.svg" width=20% align="center">
