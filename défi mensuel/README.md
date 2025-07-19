@@ -22,7 +22,7 @@ Notez toutefois qu'il n'y a pas forcément de correction pour d'autres langages.
 ### Y-a t-il des corrections ou une solution ?
 
 Oui, l'Équipe du Serveur propose des *solutions* dans divers langage, de manière générale en Scratch 3.0 (`.sb3`), plus, parfois, dans les langages suivants : 
-Oui, *à minima* en Scratch, plu, parfois :
+Oui, *à minima* en Scratch, plus, parfois :
 - en python `.py` (un langage par ligne de code orienté objet, très simple à utiliser) ;
 - en ruby `.rb` (un langage par ligne de code orienté objet, ressemblant plus à Scratch mais légèremebt plus complexe à utiliser).
 
