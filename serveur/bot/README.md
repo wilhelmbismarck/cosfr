@@ -1,6 +1,6 @@
 # Scratch Portals
 
-<img src="bot/assets/svg/bot.svg">
+<img src="assets/svg/bot.svg">
 
 **Scratch Portals** est le bot discord du serveur COSFR.
 
