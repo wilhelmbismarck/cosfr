@@ -6,22 +6,23 @@
 
 ################## Initialisation     ##################
 ### Imports packages
-import scratchattach        as     sa
+import scratchattach                  as     sa
+import scratchattach.utils.exceptions as     sa_exceptions
 import discord
-import discord.app_commands as     discord_cmd
-from   discord.ext          import tasks
-from   datetime             import time
-from   zoneinfo             import ZoneInfo
+import discord.app_commands           as     discord_cmd
+from   discord.ext                    import tasks
+from   datetime                       import time
+from   zoneinfo                       import ZoneInfo
 ### Imports local packages
-import util.sub.session     as myself
-import util.sub.exceptions  as bot_exceptions
+import util.sub.session               as myself
+import util.sub.exceptions            as bot_exceptions
 ### Vérification de l'intégrité des données
 if not myself.filled :
     raise RuntimeError('bot_data.py is unfilled')
 
 ################## Translations       ##################
 
-from util.translations import Translations, get_partial_emoji
+from util.translations import Translations, get_partial_emoji, get_emoji
 translations = Translations()
 
 ################## Historique         ##################
@@ -275,7 +276,7 @@ class Compte(discord.app_commands.Group) :
                 for b in rankings[c] :
                     # Save board
                     ranksID = f"{c}/{b}"
-                    rk_b.append((ranksID, translations.get(f"words/scratch/{ranksID}", lang), get_partial_emoji(b)))
+                    rk_b.append((ranksID, bot.tr(interaction.guild, f"words/scratch/{ranksID}"), get_partial_emoji(b)))
                     # Gen embed
                     gen_embed = def_embed.copy()
                     # - ranks text
@@ -284,12 +285,12 @@ class Compte(discord.app_commands.Group) :
                         userID = rankings[c][b][i][0]
                         ranks += f"#`{i+1}` ~ " + f"<@{userID}>" + "\n"
                     # - ranks field
-                    gen_embed.add_field(name = f"{auth_db.ranks_title(c, b)}", value = ranks, inline = False)
+                    gen_embed.add_field(name = f"{get_emoji(b)} {bot.tr(interaction.guild, f"words/scratch/{ranksID}")}", value = ranks, inline = False)
                     # Save embed
                     rk_e[ranksID] = gen_embed
             return (rk_b, rk_e)
                 
-        page_items = [(':root', translations.get('texts/pager/podium', lang), '🏆'), (':mine', translations.get('texts/pager/minePage', lang), '⏺️'), (':back', translations.get('texts/pager/previousPage', lang), '⬅️'), (':next', translations.get('texts/pager/nextPage', lang), '➡️'), ('!exit', translations.get('words/exit', lang), '🛑')]
+        page_items = [(':root', bot.tr(interaction.guild, 'texts/pager/podium'), '🏆'), (':mine', bot.tr(interaction.guild, 'texts/pager/minePage'), '⏺️'), (':back', bot.tr(interaction.guild, 'texts/pager/previousPage'), '⬅️'), (':next', bot.tr(interaction.guild, 'texts/pager/nextPage'), '➡️'), ('!exit', bot.tr(interaction.guild, 'words/exit'), '🛑')]
         
         await interaction.response.send_message(embed = bot.buildEmbed('info', title = "Classements", des = "Génération des classements, veuillez patienter."))
         
@@ -307,7 +308,7 @@ class Compte(discord.app_commands.Group) :
             ranks_embeds = ranks_build[1]
             if button_focus is None : button_focus = ranks_boards[0][0]
             # Generate view
-            ranks_view = bot.ChoiceView(ranks_boards + page_items, button_focus)
+            ranks_view = bot.ChoiceView(ranks_boards + page_items, button_focus, page = page, page_range = (1, max_page))
             # Edit message
             await interaction.edit_original_response(embed = ranks_embeds[button_focus], view = ranks_view)
             # Manage view interactions
@@ -334,7 +335,146 @@ class Compte(discord.app_commands.Group) :
                 button_focus = ranks_view.value
             # loop 
         await interaction.edit_original_response(view = None)
-        return
+        return 
+    ###############################
+    # Obtenir les mieux classés d'un classement donné
+    @discord_cmd.checks.has_permissions(use_application_commands = True)
+    @discord_cmd.command(name="faceàface", description="Consulte le face à face entre deux utilisateurs authentifiés, ou un nom de scratcheur.")
+    async def faceàface(self, interaction : discord.Interaction, first_user : str, second_user : str = None):
+        userA = first_user
+        userB = interaction.user if second_user is None else second_user
+        
+        if isinstance(userA, str):
+            if userA[0:2] == '<@' and userA[-1] == '>' : 
+                userA = int(userA[2:-1])
+        elif isinstance(userA, (discord.Member, discord.User)) :
+            userA = userA.id
+        if isinstance(userB, str):
+            if userB[0:2] == '<@' and userB[-1] == '>' : 
+                userB = int(userB[2:-1])
+        elif isinstance(userB, (discord.Member, discord.User)) :
+            userB = userB.id
+        
+        userA_reg = auth_db.is_registered(userA)
+        if not userA_reg : 
+            entryA = None
+            try :
+                userA_sc  = sa.get_user(userA)
+                userA_reg = True
+            except (sa_exceptions.UserNotFound, TypeError, ValueError) :
+                userA_reg = False
+        else             : 
+            entryA   = auth_db.user_get(userA)
+            userA_sc = sa.get_user(entryA['scratch']['username'])
+            
+        userB_reg = auth_db.is_registered(userB)
+        if not userB_reg : 
+            entryB = None
+            try :
+                userB_sc  = sa.get_user(userB)
+                userB_reg = True
+            except (sa_exceptions.UserNotFound, TypeError, ValueError) :
+                userB_reg = False
+        else             : 
+            entryB   = auth_db.user_get(userB)
+            userB_sc = sa.get_user(entryB['scratch']['username'])
+        
+        if not userA_reg or not userB_reg :
+            embed = bot.buildEmbed('error', title = ':crossed_swords: ' + bot.tr(interaction.guild, 'commands/account/h2h/eTitle'), des = "")
+            if userA_reg : userA_name = "eFound"
+            else         : userA_name = "eNotFound"
+            if userB_reg : userB_name = "eFound"
+            else         : userB_name = "eNotFound"
+            embed.add_field(name = str(userA), value = bot.tr(interaction.guild, f'commands/account/h2h/{userA_name}'), inline = False)
+            embed.add_field(name = str(userB), value = bot.tr(interaction.guild, f'commands/account/h2h/{userB_name}'), inline = False)
+            await interaction.response.send_message(embed = embed)
+            return
+        
+        from copy import deepcopy
+        
+        def __calc_stats(user : sa.User) -> dict :
+            entry = dict()
+            # Scratch user data
+            entry['id']      = '`unknow`'
+            entry['scratch'] = dict()
+            entry['scratch']['username'] = user.name
+            entry['scratch']['id']       = user.id
+            # Stats
+            stats         = deepcopy(auth_db.empty_stat)
+            project_count = user.project_count()
+            stats['projects']['count'] = project_count
+            for i in range(project_count) :
+                project = user.projects(limit = 1, offset = i)[0]
+                project.update()
+                stats['projects']['views']     += project.views
+                stats['projects']['loves']     += project.loves
+                stats['projects']['favorites'] += project.favorites
+                stats['projects']['remixs']    += project.remix_count
+                if project.remix_parent is not None :
+                    stats['projects']['remixed'] += 1
+            # Profile Stats
+            stats['profile']['followers'] = user.follower_count()
+            stats['profile']['following'] = user.following_count()
+            entry['stats'] = stats
+            
+            return entry
+        
+        defered = False
+        if entryA is None and entryB is None :
+            defered = True
+            await interaction.response.defer()
+            entryA = __calc_stats(userA_sc)
+            entryB = __calc_stats(userB_sc)
+        elif entryA is None :
+            defered = True
+            await interaction.response.defer()
+            entryA = __calc_stats(userA_sc) 
+        elif entryB is None :
+            defered = True
+            await interaction.response.defer()
+            entryB = __calc_stats(userB_sc)
+        userA_name = entryA['scratch']['username'] 
+        userB_name = entryB['scratch']['username']
+        
+        from math import log, sqrt
+        
+        def __calc_index(entry : dict) -> int :
+            entry_views = entry['stats']['projects']['views']
+            entry_loves = entry['stats']['projects']['loves']
+            entry_favs  = entry['stats']['projects']['favorites']
+            if entry_loves == 0 or entry_favs == 0 : return 0
+            return max(0, min(100, round(sqrt(sqrt((1 / (1 + log(entry_views / entry_loves) + log(entry_loves / entry_favs))))) * 100)))
+        
+        userA_index = __calc_index(entryA)
+        userB_index = __calc_index(entryB)
+                
+        H2H = {'projects' : ('views', 'loves', None), 'profile' : ('followers', None), 'forum' : ('posts', None)}
+        
+        embed = bot.buildEmbed('info', title = ':crossed_swords: ' + bot.tr(interaction.guild, 'commands/account/h2h/eTitle'), des = bot.tr(interaction.guild, 'commands/account/h2h/eField', args = {'a' : userA_name, 'b' : userB_name}))
+        embed.add_field(name = bot.tr(interaction.guild, 'words/scratchers'), value = "", inline = True)
+        embed.add_field(name = userA_name, value = "", inline = True)
+        embed.add_field(name = userB_name, value = "", inline = True)
+        
+        for category in H2H :
+            for board in H2H[category] : 
+                if board is None : continue
+                title = get_emoji(board) + ' ' + bot.tr(interaction.guild, f"words/scratch/{category}/{board}")
+                fieldA = f"`{bot.number(interaction.guild, entryA['stats'][category][board])}`"
+                fieldB = f"`{bot.number(interaction.guild, entryB['stats'][category][board])}`"
+                embed.add_field(name = title, value = "", inline = True)
+                embed.add_field(name = "", value = fieldA, inline = True)
+                embed.add_field(name = "", value = fieldB, inline = True)
+        
+        title = get_emoji('index') + ' ' + bot.tr(interaction.guild, "texts/index")
+        embed.add_field(name = title, value = "", inline = True)
+        embed.add_field(name = "", value = f"`{userA_index}/100`", inline = True)
+        embed.add_field(name = "", value = f"`{userB_index}/100`", inline = True)
+        #embed.add_field(name = bot.tr(interaction.guild, "texts/index/title"), value = bot.tr(interaction.guild, "texts/index/about"), inline = False)
+                                
+        if defered : await interaction.followup.send(embed = embed)
+        else       : await interaction.response.send_message(embed = embed)
+        
+        return     
         
     ###############################
     
@@ -344,49 +484,104 @@ class Admin(discord.app_commands.Group) :
     @discord_cmd.command(name="sauver", description="Sauvegarde les authentifications.")
     async def sauver(self, interaction : discord.Interaction):
         if not discord.app_commands.checks.has_permissions(administrator = True): 
-            await interaction.response.send_message(embed = bot.buildEmbed('error', title = 'Permissions insuffisantes', des = 'Vous ne disposez pas de permission suffisantes pour exécuter cette commande'), ephemeral = True)
+            await bot.missing_permissions(interaction)
             return
+        await interaction.response.send_message(embed = bot.buildEmbed('info', title = bot.tr(interaction.guild, "commands/admin/save/eTitle"), des = bot.tr(interaction.guild, "commands/admin/save/eSaving")))
         auth_db.save()
-        await interaction.response.send_message(embed = bot.buildEmbed('info', title = f'Sauvegarde de la Base de Donnée AUTH', des = 'Données sauvegardées manuellement.'))
+        await interaction.edit_original_response(embed = bot.buildEmbed('info', title = bot.tr(interaction.guild, "commands/admin/save/eTitle"), des = bot.tr(interaction.guild, "commands/admin/save/eSaved")))
     ###############################
     # Informations sur les Auths
     @discord_cmd.checks.has_permissions(administrator = True)
     @discord_cmd.command(name="authinfo", description="Consulter les authentifications enregistrées.")
-    async def authinfo(self, interaction : discord.Interaction, début : int = 0, plage : int = 10):
+    async def authinfo(self, interaction : discord.Interaction):
         if not discord.app_commands.checks.has_permissions(administrator = True): 
-            await interaction.response.send_message(embed = bot.buildEmbed('error', title = 'Permissions insuffisantes', des = 'Vous ne disposez pas de permission suffisantes pour exécuter cette commande'), ephemeral = True)
+            await bot.missing_permissions(interaction)
             return
-        auth_list = [cp for cp in auth_db]
-        auth_list_len = len(auth_list)
-        plage = max(min(25, plage), 10)
-        début = max(0, début)
-        if début >= auth_list_len :
-            await interaction.response.send_message(embed = bot.buildEmbed('error', title = 'Base de Donnée AUTH', des = f"**Erreur** : Index de début de pagination (`{début}`) en dehors des données (`{auth_list_len}`)."), ephemeral = True)
-            return
-        fin          : int           = min(début + plage, auth_list_len)
-        auth_extract : list          = sorted(auth_list, key = (lambda x : str(x[1]).lower()) )[début:fin]
-        emb_list     : discord.Embed = bot.buildEmbed('info', title = f'Base de Donnée AUTH', des = f'Authenfications enregistrées [{début + 1} ~ {fin} / {auth_list_len} ].')
-        for discordID, scratchID, scratchNAME in auth_extract : 
-            emb_list.add_field(name = f"{scratchNAME} ~ #`{scratchID}`", value = f"<@{discordID}> ~ `{discordID}` ({get_md_link_profile(scratchNAME, 'profil')})", inline = True)
-        await interaction.response.send_message(embed = emb_list)
+        
+        page      = 1
+        pagesize  = 10
+        max_page  = (len(auth_db) // pagesize) + 1
+        auth_list = []
+        for userID in auth_db.db :
+            userID    = int(userID)
+            entry     = auth_db.user_get(userID)
+            scratchID = int(entry['scratch']['id'])
+            scratchNM = entry['scratch']['username']
+            auth_list.append((scratchNM, scratchID, userID))
+        auth_list.sort(key = lambda x : x[0])
+        
+        lang     = get_lang(interaction.guild)
+        
+        def get_page(page):
+            if page is None     : page = 1
+            if page <  1        : page = 1
+            if page >  max_page : page = max_page
+            if page * pagesize > len(auth_db) : 
+                sel_range = ((page - 1) * pagesize, len(auth_db))
+            else : 
+                sel_range = ((page - 1) * pagesize, page * pagesize)
+            return (page, sel_range)
+        
+        def gen_page(page_index : int, data_range : tuple) :
+            embed = bot.buildEmbed('info', bot.tr(interaction.guild, "commands/admin/consult/eTitle"), bot.tr(interaction.guild, "commands/admin/consult/ePage", args = {'page' : page_index, 'onset' : data_range[0] + 1, 'offset' : data_range[1], 'limit' : len(auth_db)}))
+            for i in range(data_range[0], data_range[1]) :
+                entry = auth_list[i]
+                title = f"{bot.tr(interaction.guild, "words/entry")} ~ `{i + 1}`"
+                field = f"<@{entry[2]}> : **{entry[0]}** #`{entry[1]}` ({get_md_link_profile(entry[0], bot.tr(interaction.guild, "words/scratch/profile"))})"
+                embed.add_field(name = title, value = field, inline = False)
+            return embed
+        
+        await interaction.response.send_message(embed = bot.buildEmbed('info', title = bot.tr(interaction.guild, "commands/admin/consult/eTitle"), des = bot.tr(interaction.guild, "commands/admin/consult/eWait")))
+        
+        page_items = [(':root', bot.tr(interaction.guild, 'texts/pager/firstPage'), '⏮️'), (':last', bot.tr(interaction.guild, 'texts/pager/lastPage'), '⏭️'), (':back', bot.tr(interaction.guild, 'texts/pager/previousPage'), '⬅️'), (':next', bot.tr(interaction.guild, 'texts/pager/nextPage'), '➡️'), ('!exit', bot.tr(interaction.guild, 'words/exit'), '🛑')]
+        
+        run = True
+        
+        while run : 
+            # Get page, range
+            page, entry_range = get_page(page)
+            # Build embed
+            embed             = gen_page(page, entry_range)
+            # Build view
+            pager      = bot.ChoiceView(choices = page_items, page = 1, page_range = (1, max_page))
+            # Edit message
+            await interaction.edit_original_response(embed = embed, view = pager)
+            # Await interaction with page
+            timeout = await pager.wait()
+            
+            if timeout : 
+                run = False
+            elif pager.value == '!exit' :
+                run = False
+            elif pager.value == ':root' :
+                page = 1
+            elif pager.value == ':last' :
+                page = max_page
+            elif pager.value == ':back' :
+                page -= 1
+            elif pager.value == ':next' :
+                page += 1
+        
+        interaction.edit_original_response(view = None)
+        
         return
     ###############################
     # Afficher les données brutes d'une entrée de la DB
     @discord_cmd.checks.has_permissions(administrator = True)
-    @discord_cmd.command(name="entrée", description="Obtenir les donnes brutes d'une authenfication.")
-    async def entrée(self, interaction : discord.Interaction, member : discord.Member = None):
+    @discord_cmd.command(name="authentrée", description="Obtenir les donnes brutes d'une authenfication.")
+    async def authentrée(self, interaction : discord.Interaction, member : discord.Member = None):
         if not discord.app_commands.checks.has_permissions(administrator = True): 
-            await interaction.response.send_message(embed = bot.buildEmbed('error', title = 'Permissions insuffisantes', des = 'Vous ne disposez pas de permission suffisantes pour exécuter cette commande'), ephemeral = True)
+            await bot.missing_permissions(interaction)
             return
         if member is None : member = interaction.user
         from json import dumps
         try             :
             memberID   = member.id
             memberDATA = auth_db.user_get(memberID)
-            emb      = bot.buildEmbed('info', title = 'Entrée Base de Donnée AUTH', des = f"Entrée de <@{memberID}> :\n```JSON\n{dumps(memberDATA, indent = 4, ensure_ascii = False)}\n```")
+            emb      = bot.buildEmbed('info', title = bot.tr(interaction.guild, "commands/admin/entry/eTitle"), des = bot.tr(interaction.guild, "commands/admin/entry/eEntry", args = {'user' : member.id}) + f"\n\n```JSON\n{dumps(memberDATA, indent = 4, ensure_ascii = False)}\n```")
             await interaction.response.send_message(embed = emb, ephemeral = True)
         except KeyError : 
-            await interaction.response.send_message(embed = bot.buildEmbed('error', title = 'Entrée base de Donnée AUTH manquante', des = f"<@{memberID}> n'a pas lié son compte."), ephemeral = True)
+            await interaction.response.send_message(embed = bot.buildEmbed('error', title = bot.tr(interaction.guild, "commands/admin/entry/eTitle"), des = bot.tr(interaction.guild, "commands/admin/entry/eError", args = {'user' : member.id})), ephemeral = True)
         return
     ###############################
     # Éteindre le bot
@@ -394,15 +589,16 @@ class Admin(discord.app_commands.Group) :
     @discord_cmd.command(name="éteindre", description="Éteint le bot.")
     async def éteindre(self, interaction : discord.Interaction):
         if not discord.app_commands.checks.has_permissions(administrator = True): 
-            await interaction.response.send_message(embed = bot.buildEmbed('error', title = 'Permissions insuffisantes', des = 'Vous ne disposez pas de permission suffisantes pour exécuter cette commande'), ephemeral = True)
+            await bot.missing_permissions(interaction)
             return
-        conf_embed    = bot.buildEmbed('confirmation', title = f"Éteindre {bot.user.name}",          des = "Voulez-vous vraiment éteindre le bot ?")
-        conf_embed_ok = bot.buildEmbed('confirmation', title = f"Éteindre {bot.user.name} (annulé)", des = "Le bot reste en ligne.")
-        conf_embed_no = bot.buildEmbed('confirmation', title = f"Éteindre {bot.user.name}",          des = "Le bot va progressivement être mis hors-ligne.")
-        conf = await bot.confirmation(interaction = interaction, embed = conf_embed, success = conf_embed_ok, cancel = conf_embed_no, buttons = ("Maintenir en ligne", "Éteindre"))
+        conf_embed    = bot.buildEmbed('confirmation', title = bot.tr(interaction.guild, "commands/admin/close/eTitle", args = {'botname' : bot.user.name}), des = bot.tr(interaction.guild, "commands/admin/close/eAsk"))
+        conf_embed_ok = bot.buildEmbed('confirmation', title = bot.tr(interaction.guild, "commands/admin/close/eTitle", args = {'botname' : bot.user.name}), des = bot.tr(interaction.guild, "commands/admin/close/eSuccess"))
+        conf_embed_no = bot.buildEmbed('confirmation', title = bot.tr(interaction.guild, "commands/admin/close/eTitle", args = {'botname' : bot.user.name}), des = bot.tr(interaction.guild, "commands/admin/close/eCancel"))
+        conf = await bot.confirmation(interaction = interaction, embed = conf_embed, success = conf_embed_ok, cancel = conf_embed_no, buttons = (bot.tr(interaction.guild, "commands/admin/close/iClosed"), bot.tr(interaction.guild, "commands/admin/close/iCancel")))
         if conf : return
         bot.before_close(auth_db, auth, translations)
-        await bot.close()
+        await interaction.edit_original_response(embed = bot.buildEmbed('confirmation', title = bot.tr(interaction.guild, "commands/admin/close/eTitle", args = {'botname' : bot.user.name}), des = bot.tr(interaction.guild, "commands/admin/close/eClosed")))
+        await bot.close() 
         return
     ###############################
     
@@ -412,18 +608,18 @@ class Configure(discord.app_commands.Group) :
     @discord_cmd.command(name="accueil", description="Définir un salon d'accueil. Le bot y accueillera vos nouveaux membres. Laisser vide pour désactiver.")
     async def accueil(self, interaction : discord.Interaction, salon : discord.TextChannel = None):
         if not discord.app_commands.checks.has_permissions(manage_guild = True): 
-            await interaction.response.send_message(embed = bot.buildEmbed('error', title = 'Permissions insuffisantes', des = 'Vous ne disposez pas de permission suffisantes pour exécuter cette commande'), ephemeral = True)
+            await bot.missing_permissions(interaction)
             return
+        guild = interaction.guild
         if salon is None : 
             bot.config[guild.id]['welcome']['channel'] = None
-            await interaction.response.send_message(embed = bot.buildEmbed('info', title = "Configuration [salon d'accueil]", des = "Fonctionnalité désactivée."))
+            await interaction.response.send_message(embed = bot.buildEmbed('info', title = bot.tr(interaction.guild, 'commands/configure/welcome/eTitle'), des = bot.tr(interaction.guild, 'commands/configure/welcome/eDisabled')))
         if not isinstance(salon, (discord.TextChannel)) : 
-            await interaction.response.send_message(embed = bot.buildEmbed('error', title = "Configuration [salon d'accueil]", des = f"Impossible de définir le salon d'accueil.\nType incorrect : `{type(channel)}`."), ephemeral = True)
+            await interaction.response.send_message(embed = bot.buildEmbed('error', title = bot.tr(interaction.guild, 'commands/configure/welcome/eTitle'), des = bot.tr(interaction.guild, 'commands/configure/welcome/eTypeErr', args = {'type' : type(salon)})), ephemeral = True)
             return
-        guild = salon.guild
         if not guild.id in bot.config : raise bot_exceptions.UnknowGuildError(self, guild)
         bot.config[guild.id]['welcome']['channel'] = salon.id
-        await interaction.response.send_message(embed = bot.buildEmbed('info', title = "Configuration [salon d'accueil]", des = f"Le nouveau salon d'accueil est <#{salon.id}>."))
+        await interaction.response.send_message(embed = bot.buildEmbed('info', title = bot.tr(interaction.guild, 'commands/configure/welcome/eTitle'), des = bot.tr(interaction.guild, 'commands/configure/welcome/eDefined', args = {'channelID' : salon.id})))
         return
     ###############################
     # Définir un salon d'accueil
@@ -431,16 +627,16 @@ class Configure(discord.app_commands.Group) :
     @discord_cmd.command(name = "langue", description = "Choisir la langue du serveur.")
     async def langue(self, interaction : discord.Interaction):
         if not discord.app_commands.checks.has_permissions(manage_guild = True): 
-            await interaction.response.send_message(embed = bot.buildEmbed('error', title = 'Permissions insuffisantes', des = 'Vous ne disposez pas de permission suffisantes pour exécuter cette commande'), ephemeral = True)
+            await bot.missing_permissions(interaction)
             return
         lang = get_lang(interaction.guild)
         
-        lang_embed   = bot.buildEmbed('info', title = translations.get('commands/configure/language/eTitle', lang), des = translations.get('commands/configure/language/eField', lang))
+        lang_embed   = bot.buildEmbed('info', title = bot.tr(interaction.guild, 'commands/configure/language/eTitle'), des = bot.tr(interaction.guild, 'commands/configure/language/eField'))
         lang_choices = []
         for langID, entry in translations.LANG_DATA.items() :
             lang_choices.append( (langID, entry['name'], entry['emoji']) )
         
-        lang_choices.append(('!exit', translations.get('words/exit', lang), '🛑'))
+        lang_choices.append(('!exit', bot.tr(interaction.guild, 'words/exit', lang), '🛑'))
         
         lang_view  = bot.ChoiceView(lang_choices, lang)
         
@@ -451,6 +647,7 @@ class Configure(discord.app_commands.Group) :
         if timeout : 
             return
         if lang_view.value == '!exit' :
+            await interaction.edit_original_response(view = None)
             return
         
         lang = lang_view.value
@@ -458,7 +655,7 @@ class Configure(discord.app_commands.Group) :
         bot.config[interaction.guild.id]['language'] = lang
         fullname = translations.LANG_DATA[lang]['name']
         
-        await interaction.edit_original_response(embed = bot.buildEmbed('info', title = translations.get('commands/configure/language/eTitle', lang), des = translations.get('commands/configure/language/eDefined', lang, language = lang, fullname = fullname)), view = None)
+        await interaction.edit_original_response(embed = bot.buildEmbed('info', title = bot.tr(interaction.guild, 'commands/configure/language/eTitle'), des = bot.tr(interaction.guild, 'commands/configure/language/eDefined', args = {'language' : lang, 'fullname' : fullname})), view = None)
         
         return
     ###############################
