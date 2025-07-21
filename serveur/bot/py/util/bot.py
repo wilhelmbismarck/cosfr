@@ -1,8 +1,9 @@
 from discord.ext.commands import Bot
 from discord.ui import View, button, Button
-from discord import Interaction, Intents, Colour, Embed, ButtonStyle, PartialEmoji
+from discord import Interaction, Guild, Intents, Colour, Embed, ButtonStyle, PartialEmoji
 
 from util.sub.exceptions import *
+from util.translations   import Translations
 
 mainGuilds = [1160187652184735815, 1242127738702135316]
 
@@ -22,7 +23,41 @@ class ScratchPortals(Bot):
         # Self
         self.botName = name
         self.config  = {}
+        self.transl  = Translations()
         super().__init__('?', intents = botIntents)
+        
+    def tr(self, guild : Guild, path : str, transform : tuple = (True, False), args : dict = {}) :
+        """
+        # ScratchPortals
+        ## get Translation
+        
+        Return the translation of `path` according to `guild` language.-
+        - `transform` -> transform tuple (see `translations.py`) ;
+        - `args` -> a dict of values, for custom entries ;
+        """
+        lang = self.__safe_language(guild)
+        return self.transl.get(path, lang, transform, args)
+    
+    def number(self, guild : Guild, number : int | str) :
+        """
+        # ScratchPortals
+        ## get Number
+        
+        Return a stylised number.
+        """
+        lang = self.__safe_language(guild)
+        sep  = self.transl.LANG_DATA[lang]['num sep']
+        if isinstance(number, int) : 
+            number = str(number)
+        build = ""
+        for i in range(0, len(number), 3) :
+            if i > 0 : 
+                build = build + sep
+            if i + 3 < len(number):
+                build = build + number[i : i + 3]
+            else : 
+                build = build + number[i : ]
+        return build
                          
     def buildEmbed(self, model : str = "info", title : str = "Embed", des : str = "Contenu de l'Embed", thumb : str = None, image : str = None, footer : tuple[str, str] = None, fields : list[tuple[str, str, bool]] = None, colour : Colour = None) :
         """
@@ -49,6 +84,18 @@ class ScratchPortals(Bot):
             buildEmbed.set_footer(text = footer[0], icon_url = footer[1])
         buildEmbed.set_author(name = self.user.name, icon_url = self.user.avatar.url)
         return buildEmbed
+    
+    def embedNewLine(self, embed : Embed, remaining : int = None) :
+        """
+        # ScratchPortals
+        ## buildEmbed ~ NewLine
+        
+        """
+        if remaining is None :
+            embed.add_field(name = "", val = "", inline = False)
+        else : 
+            for i in range(remaining):
+                embed.add_field(name = "", val = "", inline = True)
     
     async def confirmation(self, interaction : Interaction, embed : Embed, success : Embed = None, cancel : Embed = None, buttons : tuple = ("Confirmer", "Annuler")) -> bool :
         """
@@ -99,7 +146,7 @@ class ScratchPortals(Bot):
         A `discord.View` allowing users to make a choice.
         """
         
-        def __init__(self, choices : list[tuple[str, str, str | PartialEmoji]], currentID : int = None):
+        def __init__(self, choices : list[tuple[str, str, str | PartialEmoji]], currentID : int = None, page : int = None, page_range : tuple[int, int] = None):
             """
             A `ChoiceView` allows the user to choose an item.
             
@@ -120,7 +167,13 @@ class ScratchPortals(Bot):
                 elif choiceID[0] == '!' : 
                     button = Button(label = label, style = ButtonStyle.danger, emoji = emoji)
                 elif choiceID[0] == ':' : 
-                    button = Button(label = label, style = ButtonStyle.primary, emoji = emoji)
+                    disable = False
+                    if page is not None and page_range is not None : 
+                        if   choiceID in [':root', ':back'] and page == page_range[0]: 
+                            disable = True
+                        elif choiceID in [':last', ':next'] and page == page_range[1]:
+                            disable = True
+                    button = Button(label = label, style = ButtonStyle.primary, emoji = emoji, disabled = disable)
                 else :
                     button = Button(label = label, style = ButtonStyle.secondary, emoji = emoji)
                 button.callback = self.returnID(choiceID)
@@ -151,3 +204,19 @@ class ScratchPortals(Bot):
         print('BOT          • saving translations')
         translations.backup_save()
         print('MAIN | close ;')
+        
+    async def missing_permissions(self, interaction : Interaction):
+        """
+        # ScratchPortals
+        ## Missing permissions embed
+    
+        Gen & send a `missing perms` embed.
+        """
+        await interaction.response.send_message(embed = self.buildEmbed('error', title = self.tr(interaction.guild, 'commands/sys/no_perms/eTitle')), des = self.tr(interaction.guild, 'commands/sys/no_perms/eField'), view = None, ephemeral = True)
+        
+    def __safe_language(self, guild : Guild) :
+        if guild.id in self.config :
+            lang = self.config[guild.id]['language']
+        else : 
+            lang = 'fr'
+        return lang
