@@ -6,6 +6,7 @@ Contains different exceptions used by the bot.
 
 from discord        import Member, User
 from scratchattach  import User, get_user, Project
+from copy           import deepcopy
 
 class BotDatabase :
     """
@@ -29,6 +30,15 @@ class BotDatabase :
     ## DB
     Text key associated with each board, category (`:root`) from stat.
     """
+    
+    empty_stat = {'projects' : {'count' : 0, 'views' : 0, 'loves' : 0, 'favorites' : 0, 'remixs' : 0, 'remixed' : 0},
+                  'profile'  : {'followers' : 0, 'following' : 0},
+                  'forum'    : {'posts' : 0, 'topics' : 0, 'post_by_category' : {}}
+                  }
+    """
+    ## DB
+    Empty stat sheet.
+    """
 
     def __init__(self, backup : str = None) :
         self.version  = 1
@@ -48,7 +58,7 @@ class BotDatabase :
         
         Init rankings (`self.ranking`). Create empty table for each board.
         """
-        self.rankings = BotDatabase.empty_rank.copy()
+        self.rankings = deepcopy(BotDatabase.empty_rank)
         for category in self.rankings :
             for board in self.rankings[category] :
                 self.rankings[category][board] = []
@@ -100,7 +110,7 @@ class BotDatabase :
     
     def __def_ranks(self, id : int):
         db_entry = self.user_get(id)
-        db_entry['ranks'] = BotDatabase.empty_rank
+        db_entry['ranks'] = deepcopy(BotDatabase.empty_rank)
         return
     
     def ranks_title(self, category : str, board : str = None) :
@@ -216,10 +226,7 @@ class BotDatabase :
         print('DB           • user_get')
         db_entry    = self.user_get(id)
         user : User = get_user(db_entry['scratch']['username'])
-        stats = {'projects' : {'count' : 0, 'views' : 0, 'loves' : 0, 'favorites' : 0, 'remixs' : 0, 'remixed' : 0},
-                 'profile'  : {'followers' : 0, 'following' : 0},
-                 'forum'    : {'posts' : 0, 'topics' : 0, 'post_by_category' : {}}
-                 }
+        stats = deepcopy(BotDatabase.empty_stat)
         ## Get Projects Stats
         print('DB           • projects')
         project_count : int           = user.project_count()
