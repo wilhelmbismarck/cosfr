@@ -22,11 +22,12 @@
         <"exit"="exit">
         <"thumb"="thumbnail">
         <"image"="image">
+        <"entry"="entry">
         <"scratch">
             <"project">
                 <":root"="project">
-                <"love"="loves">
-                <"favorite"="favoritr">
+                <"love"="love">
+                <"favorite"="favorite">
                 <"favorites"="favorites">
                 <"view"="view">
                 <"views"="views">
@@ -36,7 +37,7 @@
                 <"instructions"="instructions">
                 <"credits"="credits">
                 <"shared"="shared">
-                <"loves"="">
+                <"loves"="loves">
                 <"like">
                     <"0"="redirect">
                     <"1"="love">
@@ -205,6 +206,12 @@
             <"podium"="podium">
         <!>
 
+        <"index">
+            <":root"="Quality Tag">
+            <"about"="The **Quality Tag** is an index representing your average statistics per project in relation to the number of views they receive. The higher it is, the more Scratch statistics your projects generate for you.">
+            <"title"="About Quality Tag">
+        <!>
+
     <!>
 
     <"commands">
@@ -223,7 +230,7 @@
                 <"des"="Define a new default language for the bot.">
                 <"eTitle"="Configure [language]">
                 <"eField"="Choose a new language for the bot.">
-                <"eDefined"="The bot's new language is `{language}` ({fullname}).">
+                <"eDefined"="The bot\'s new language is `{language}` ({fullname}).">
             <!>
 
             <":root"="configure">
@@ -231,9 +238,57 @@
         <!>
 
         <"admin">
+            <"close">
+                <":root"="close">
+                <"des"="Switch off.">
+                <"eTitle"="Switch {botname} off">
+                <"eAsk"="Confirm you want to switch the bot.">
+                <"eSuccess"="Keeping bot online.">
+                <"eCancel"="Switching the bot off, please wait.">
+                <"eClosed"="Switched the bot off.">
+                <"iClosed"="Keep online">
+                <"iCancel"="Go offline">
+            <!>
+
+            <"save">
+                <":root"="save">
+                <"des"="Save authentication database.">
+                <"eTitle"="Authentication DB - Save">
+                <"eSaving"="**Saving** authentications DB.">
+                <"eSaved"="**Saved** authentications DB.">
+            <!>
+
+            <"consult">
+                <":root"="authinfo">
+                <"des"="Consult authentication entries.">
+                <"eTitle"="Authentication DB - Consult">
+                <"ePage"="Registered authentications [{onset} ~ {offset} / {limit}]">
+                <"eError"="Paging index (`{onset}`) out of range (`{limit}`).">
+                <"eWait"="Processing data, please wait...">
+            <!>
+
+            <"entry">
+                <":root"="authentry">
+                <"des"="Consult a raw authentication entry.">
+                <"eTitle"="Authentication DB - Raw entry">
+                <"eError"="<@{user}> dit not bounded Scratch and Discord accounts.">
+                <"eEntry"="<@{user}>\'s entry :">
+            <!>
+
+            <":root"="admin">
+            <"des"="commandes des gestionnaires du bot">
         <!>
 
         <"account">
+            <"h2h">
+                <":root"="h2h">
+                <"des"="Display head to head between two scratchers.">
+                <"eTitle"="Head to Head">
+                <"eField"="Head to head between **{a}** and **{b}**.">
+                <"eFound"="Is a scratcher.">
+                <"eNotFound"="Is not a scratcher, or, has not bounded Scratch and Discord accounts.">
+            <!>
+
         <!>
 
         <"sys">
@@ -274,6 +329,7 @@
         <"exit"="quitter">
         <"thumb"="vignette">
         <"image"="image">
+        <"entry"="entrée">
         <"scratch">
             <"project">
                 <":root"="projet">
@@ -452,17 +508,23 @@
             <"podium"="podium">
         <!>
 
+        <"index">
+            <":root"="Index Qualité">
+            <"about"="L\'**Index Qualité** est un indice représentant vos statistiques moyennes par projet par rapport au nombre de vues de ces derniers. Plus il est élevé, plus vos projets vous rapportent de statistiques Scratch.">
+            <"title"="À propos de l'Index Qualité">
+        <!>
+
     <!>
 
     <"commands">
         <"configure">
             <"welcome">
                 <":root"="accueil">
-                <"des"="Définir un salon d'accueil. Laisser vide pour désactiver cette fonctionnalité.">
-                <"eTitle"="Configuration [salon d'accueil]">
-                <"eTypeErr"="Impossible de définir le salon d'accueil. Salon {type} inconnu.">
+                <"des"="Définir un salon d\'accueil. Laisser vide pour désactiver cette fonctionnalité.">
+                <"eTitle"="Configuration [salon d\'accueil]">
+                <"eTypeErr"="Impossible de définir le salon d\'accueil. Salon {type} inconnu.">
                 <"eDisabled"="Fonctionnalité désactivée.">
-                <"eDefined"="Le nouveau salon d'accueil est <#{channelID}>.">
+                <"eDefined"="Le nouveau salon d\'accueil est <#{channelID}>.">
             <!>
 
             <"language">
@@ -478,9 +540,57 @@
         <!>
 
         <"admin">
+            <"close">
+                <":root"="éteindre">
+                <"des"="Éteindre le bot.">
+                <"eTitle"="Éteindre {botname}">
+                <"eAsk"="Souhaitez-vous réellement éteindre le bot ?">
+                <"eSuccess"="Le bot restera en ligne.">
+                <"eCancel"="Le bot va progressivement s\'éteindre, veuillez patienter.">
+                <"eClosed"="Le bot s\'est éteint.">
+                <"iClosed"="Maintenir en ligne">
+                <"iCancel"="Éteindre">
+            <!>
+
+            <"save">
+                <":root"="sauver">
+                <"des"="Sauvegarde la base de donnée des authentifications.">
+                <"eTitle"="Base de donnée Authentifications - Sauvegarder">
+                <"eSaving"="Sauvegarde manuelle des authentifications **en cours**.">
+                <"eSaved"="Sauvegarde manuelle des authentifications **terminée**.">
+            <!>
+
+            <"consult">
+                <":root"="authinfo">
+                <"des"="Consulter les différentes authentifications de la base de donnée.">
+                <"eTitle"="Base de donnée Authentifications - Consulter">
+                <"ePage"="Authenfications enregistrées [{onset} ~ {offset} / {limit}]">
+                <"eError"="Index de début de pagination (`{onset}`) en dehors des données (`{limit}`).">
+                <"eWait"="Traitement des données, veuillez patienter...">
+            <!>
+
+            <"entry">
+                <":root"="authentrée">
+                <"des"="Obtenir les données brutes d\'une authenfication.">
+                <"eTitle"="Base de donnée Authentifications - Entrée">
+                <"eError"="<@{user}> n\'a pas lié de compte Scratch à son compte Discord.">
+                <"eEntry"="Entrée de <@{user}> :">
+            <!>
+
+            <":root"="admin">
+            <"des"="commandes des gestionnaires du bot">
         <!>
 
         <"account">
+            <"h2h">
+                <":root"="faceàface">
+                <"des"="Affiche le face à face entre deux scratcheurs.">
+                <"eTitle"="Face à Face">
+                <"eField"="Face à face entre **{a}** et **{b}**.">
+                <"eFound"="Est bien un scratcheur.">
+                <"eNotFound"="N\'est pas un scratcheur, ou n\'a pas lié de compte Scratch à son compte Discord.">
+            <!>
+
         <!>
 
         <"sys">
