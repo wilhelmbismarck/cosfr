@@ -13,11 +13,23 @@ class Translations :
     Allow the bot to be multilingual.
     """
     
-    LANG_DATA = {'fr' : {'name' : 'Français', 'emoji' : '🇫🇷'},
-                 'en' : {'name' : 'English',  'emoji' : '🇬🇧'},
+    LANG_DATA = {'fr' : {'name' : 'Français', 'emoji' : '🇫🇷', 'num sep' : ' ', 'letters' : "âêîûôäëïöüàèéáçœ"},
+                 'en' : {'name' : 'English',  'emoji' : '🇬🇧', 'num sep' : ',','letters' : ""},
                  }
+    """
+    Languages supported by the bot.
+    The keys (such as `fr`) are shortcuts used to identify these languages by the bot).
+    
+    Their items should coutain :
+    - `name`, the full name of the language ;
+    - `emoji`, a flag emoji ;
+    - `letters`, additionnal letters used by the language (latins letters are provided by default).
+    """
 
     LANG_LIST = set(LANG_DATA.keys())
+    """
+    `set` of langs in `Translations.LANG_DATA`.
+    """
 
     empty_sheet = {'words'      : {'scratcher'  : "",
                                    'scratchers' : "",
@@ -41,6 +53,7 @@ class Translations :
                                    'exit'       : "",
                                    'thumb'      : "",
                                    'image'      : "",
+                                   'entry'      : "",
                                    'scratch' : {'project'  : {':root' : "", 'love' : "", 'loves' : "", 'like' : ('redirect', 'love'), 'likes' : ('redirect', 'loves'), 'favorite' : "", 'favorites' : "", 'view' : "", 'views' : "", 'remix' : "", 'remixs' : "", 'remixed' : "", 'instructions' : "", 'credits' : "", 'shared' : ""},
                                                 'projects' : ('redirect', 'project'),
                                                 'studio'   : {':root' : "", "curator" : "", "curators" : "", "manager" : "", "managers" : "", "host" : "", "hosts" : "", "join" : "", 'activity' : ""},
@@ -54,12 +67,16 @@ class Translations :
                                    },
                    
                    'texts'      : {'about'    : "",
+                                   'index'    : {':root'   : "",
+                                                 'about'   : "",
+                                                 'title'   : ""
+                                                 },
                                    'scratch'  : {'project' : {':root' : "", 'enableComments' : "", 'disableComments' : "", 'likeProject' : "", 'favoriteProject' : "", 'remixProject' : "", 'remixCredit' : "", 'disabledComments' : "", 'shareProject' : "", 'unshareProject' : ""},
-                                                'studio'   : {':root' : "", "changeStudioHost" : "", "inviteCurator" : "", "promoteCurator" : "", "removeCurator" : "", "removeManager" : "", "openStudio" : "", "enableOpenStudio" : "", "disableOpenStudio" : "", "addProjectToStudio" : "", "followStudio" : "", 'unfollowStudio' : "", 'leaveStudio' : ""},
-                                                'profile'  : {':root' : "", "followScratcher" : "", "unfollowScratcher" : "", "aboutMe" : ('redirect', "AM"), "AM" : "","whatI'mWorkingOn" : ('redirect', "WIWO"), "whatImWorkingOn" : ('redirect', "WIWO"), "WIWO" : "", "featuredProject" : "", "activity" : "", "sharedProjects" : "", "loveProjects" : "", "likeProjects" : ('redirect', "loveProjects"), "favoriteProjects" : "", "followingStudios" : "", "curatingStudios" : "", "enableComments" : "", "disableComments" : ""},
-                                                'forum'    : {':root' : "", "createTopic" : "", "followTopic" : "", "closeTopic" : "", "sendPost" : "", "editPost" : "", "quotePost" : "", 'changeSign' : ""},
-                                                ':root'    : ""
-                                                },
+                                                 'studio'  : {':root' : "", "changeStudioHost" : "", "inviteCurator" : "", "promoteCurator" : "", "removeCurator" : "", "removeManager" : "", "openStudio" : "", "enableOpenStudio" : "", "disableOpenStudio" : "", "addProjectToStudio" : "", "followStudio" : "", 'unfollowStudio' : "", 'leaveStudio' : ""},
+                                                 'profile' : {':root' : "", "followScratcher" : "", "unfollowScratcher" : "", "aboutMe" : ('redirect', "AM"), "AM" : "","whatI'mWorkingOn" : ('redirect', "WIWO"), "whatImWorkingOn" : ('redirect', "WIWO"), "WIWO" : "", "featuredProject" : "", "activity" : "", "sharedProjects" : "", "loveProjects" : "", "likeProjects" : ('redirect', "loveProjects"), "favoriteProjects" : "", "followingStudios" : "", "curatingStudios" : "", "enableComments" : "", "disableComments" : ""},
+                                                 'forum'   : {':root' : "", "createTopic" : "", "followTopic" : "", "closeTopic" : "", "sendPost" : "", "editPost" : "", "quotePost" : "", 'changeSign' : ""},
+                                                 ':root'   : ""
+                                                 },
                                    'pager'    : {'nextPage'     : "",
                                                  'previousPage' : "",
                                                  'minePage'     : "",
@@ -67,7 +84,7 @@ class Translations :
                                                  'podium'       : "",
                                                  'lastPage'     : "",
                                                  ':root'        : ""
-                                                }
+                                                 }
                                    },
                    
                    'commands'   : {'configure'  :   {'welcome'  : {":root"     : "",
@@ -83,14 +100,48 @@ class Translations :
                                                                    "eField"   : "",
                                                                    "eDefined" : "",
                                                                    },
-                                                     ':root' : "",
-                                                     'des'   : "",
+                                                     ':root'    : "",
+                                                     'des'      : "",
                                                      },
                                    
-                                    'admin'     :   {
+                                    'admin'     :   {'close'    : {":root"     : "",
+                                                                   "des"       : "",
+                                                                   "eTitle"    : "",
+                                                                   "eAsk"      : "",
+                                                                   "eSuccess"  : "",
+                                                                   "eCancel"   : "",
+                                                                   "eClosed"   : "",
+                                                                   "iCancel"   : "",
+                                                                   "iClosed"   : ""
+                                                                   },
+                                                     'save'     : {":root"     : "",
+                                                                   "des"       : "",
+                                                                   "eTitle"    : "",
+                                                                   "eSaving"   : "",
+                                                                   "eSaved"    : ""
+                                                                   },
+                                                     'entry'    : {":root"     : "",
+                                                                   "des"       : "",
+                                                                   "eTitle"    : "",
+                                                                   "eEntry"    : "",
+                                                                   "eError"    : ""
+                                                                   },
+                                                     'consult'  : {":root"     : "",
+                                                                   "des"       : "",
+                                                                   "eTitle"    : "",
+                                                                   "eError"    : "",
+                                                                   "ePage"     : "",
+                                                                   "eWait"     : ""
+                                                                   },
                                                      },
                                     
-                                    'account'   :   {
+                                    'account'   :   {'h2h'      : {":root"     : "",
+                                                                   "des"       : "",
+                                                                   "eTitle"    : "",
+                                                                   "eField"    : "",
+                                                                   "eFound"    : "",
+                                                                   "eNotFound" : ""
+                                                                   }
                                                      },
                                     
                                     'sys'       :   {'no_perms' : {":root"  : "",
@@ -113,7 +164,7 @@ class Translations :
     
     # Get
     
-    def get(self, path : str, lg : str, transform : tuple = (True, False), **kwargs) :
+    def get(self, path : str, lg : str, transform : tuple = (True, False), args : dict = {}) :
         """
         # Translations
         ## Get
@@ -134,11 +185,7 @@ class Translations :
             raise TranslationKeyError(path)
         if entry == "" : 
             raise TranslationMissingValueError(path, lg)
-        if transform[0] :
-            entry = entry.capitalize()
-        if transform[1] :
-            entry += '.'
-        if '{' in entry and '}' in entry :
+        if len(args) > 0 and ('{' in entry and '}' in entry) :
             build = ""
             i     = 0 
             while i < len(entry):
@@ -152,13 +199,19 @@ class Translations :
                         raise TranslationCustomValueError(entry[mem : mem + 16], mem)
                     else : 
                         name = entry[mem + 1 : i]
-                        if not name in kwargs :
+                        if not name in args :
                             raise TranslationCustomValueError(name, mem)
-                        build += str(kwargs[name])
+                        build += str(args[name])
                 else : 
                     build += lt
                 i += 1
             entry = build
+        if isinstance(entry, dict):
+            entry = entry[':root'] 
+        if transform[0] :
+            entry = self.__upper(entry, lg)
+        if transform[1] :
+            entry += '.'
         return entry
 
     # Keys
@@ -198,14 +251,45 @@ class Translations :
         """
         from util.sub.database import backup_save
         backup_save(self.db, 'translations', True)
+        
+    # System
+    
+    def __letters(self, lang : str) : 
+        letters = [lt for lt in "abcdefghijklmnopqrstuvwxyz"]
+        if 'letters' in self.LANG_DATA[lang] : 
+            letters += [lt for lt in self.LANG_DATA[lang]['letters']]
+        return letters
+    
+    def __upper(self, txt : str, lang : str) :
+        letters = self.__letters(lang)
+        stPonct = ['.', '?', '!', '…']
+        i       = 0
+        build   = [lt for lt in txt]
+        doUpper = True
+        while i < len(build) :
+            lt = build[i]
+            if lt.lower() in letters and doUpper :
+                build[i] = build[i].upper()
+                doUpper = False
+            elif lt in stPonct and not doUpper :
+                doUpper = True
+            i += 1
+        ret = ""
+        for lt in build : 
+            ret += lt
+        return ret
+        
+    # FIN            
 
 emojis = {'account'   : ("account", 1394097657982488778),
+          'certify'   : ('index', 'redirect'),
           'favorite'  : ("favorite", 1394097958353506445),
           'favorites' : ('favorite', 'redirect'),
           'follow'    : ("follow", 1394094460660355153),
           'follows'   : ('follow', 'redirect'),
           'followers' : ('follow', 'redirect'),
           'following' : ("following", 1394094471922188430),
+          'index'     : ('index', 1396486133973520456),
           'love'      : ("love", 1394094482227724328),
           'loves'     : ('love', 'redirect'),
           'like'      : ('love', 'redirect'),
@@ -214,6 +298,7 @@ emojis = {'account'   : ("account", 1394097657982488778),
           'posts'     : ('post', 'redirect'),
           'project'   : ("project", 1394099406818771106),
           'projects'  : ('project', 'redirect'),
+          'quality'   : ('index', 'redirect'),
           'ranking'   : ("ranking", 1394099421133668402),
           'rankings'  : ('ranking', 'redirect'),
           'remix'     : ("remix", 1394094547314675752),
